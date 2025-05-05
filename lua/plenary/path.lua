@@ -622,6 +622,35 @@ function Path:copy(opts)
   end
 end
 
+function Path:suffix()
+  local split = self:_split()
+  local i = #split
+  -- "path/to/something/" turns into {"path", "to", "something", ""}
+  -- preemptively protects against dumb stuff like "/path/to/something////"
+  while split[i] == "" do
+    i = i - 1
+  end
+  local last = split[i]
+  if self:is_dir() then
+    return last
+  end
+  split = vim.split(last, "%.")
+  if split[2] ~= nil then
+    table.remove(split, 1)
+    return vim.iter(split):join(".")     -- Just get rid of the first section
+  end
+  return split[1]
+end
+
+function Path:stem()
+  local split = self:_split()
+  local i = #split
+  while split[i] == "" do
+    i = i - 1
+  end
+  return vim.split(split[#split], "%.")[1]
+end
+
 function Path:touch(opts)
   opts = opts or {}
 
